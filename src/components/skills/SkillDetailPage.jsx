@@ -1,145 +1,555 @@
-import React, { Suspense, useRef, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { Suspense, useRef, useEffect, useState } from 'react'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Text, Box, Sphere, Torus, Cone, Cylinder } from '@react-three/drei'
+import { OrbitControls, Text, Box, Sphere, Torus, Cone, Cylinder, Octahedron, Icosahedron } from '@react-three/drei'
 import { HiArrowLeft, HiExternalLink, HiCode, HiAcademicCap, HiLightBulb } from 'react-icons/hi'
 import { skillsData } from './skillsData'
+import * as THREE from 'three'
 
-// 3D Models for different skills
+// Enhanced 3D Models with more movement and visual appeal
+
+// AI/ML Model - Neural Network with flowing connections
 const AIMLModel = () => {
-  const meshRef = useRef()
-  const sphereRefs = useRef([])
+  const groupRef = useRef()
+  const nodesRef = useRef([])
+  const connectionsRef = useRef([])
   
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.5
+    const time = state.clock.elapsedTime
+    
+    if (groupRef.current) {
+      groupRef.current.rotation.y = time * 0.3
     }
-    sphereRefs.current.forEach((sphere, index) => {
-      if (sphere) {
-        sphere.position.x = Math.sin(state.clock.elapsedTime + index) * 2
-        sphere.position.z = Math.cos(state.clock.elapsedTime + index) * 2
+    
+    // Animate neural nodes
+    nodesRef.current.forEach((node, index) => {
+      if (node) {
+        node.position.y = Math.sin(time + index * 0.5) * 0.5
+        node.scale.setScalar(1 + Math.sin(time * 2 + index) * 0.2)
+      }
+    })
+    
+    // Animate connections
+    connectionsRef.current.forEach((connection, index) => {
+      if (connection) {
+        connection.material.opacity = 0.3 + Math.sin(time * 3 + index) * 0.3
       }
     })
   })
 
   return (
-    <group ref={meshRef}>
-      {/* Central brain/core */}
-      <Sphere args={[1, 32, 32]} position={[0, 0, 0]}>
-        <meshStandardMaterial color="#3b82f6" wireframe />
-      </Sphere>
+    <group ref={groupRef}>
+      {/* Central brain core */}
+      <Icosahedron args={[1]} position={[0, 0, 0]}>
+        <meshStandardMaterial color="#3b82f6" wireframe transparent opacity={0.8} />
+      </Icosahedron>
       
-      {/* Neural network nodes */}
-      {Array.from({ length: 8 }).map((_, index) => (
-        <Sphere
-          key={index}
-          ref={(el) => (sphereRefs.current[index] = el)}
-          args={[0.2, 16, 16]}
-          position={[0, 0, 0]}
-        >
-          <meshStandardMaterial color="#8b5cf6" />
-        </Sphere>
-      ))}
+      {/* Neural network layers */}
+      {Array.from({ length: 12 }).map((_, index) => {
+        const angle = (index / 12) * Math.PI * 2
+        const radius = 2.5
+        return (
+          <Sphere
+            key={index}
+            ref={(el) => (nodesRef.current[index] = el)}
+            args={[0.15, 16, 16]}
+            position={[
+              Math.cos(angle) * radius,
+              Math.sin(angle * 0.5) * 0.5,
+              Math.sin(angle) * radius
+            ]}
+          >
+            <meshStandardMaterial color="#8b5cf6" />
+          </Sphere>
+        )
+      })}
       
-      {/* Connecting lines effect */}
-      <Torus args={[2, 0.1, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
+      {/* Flowing data streams */}
+      <Torus args={[2, 0.05, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
         <meshStandardMaterial color="#60a5fa" transparent opacity={0.6} />
+      </Torus>
+      <Torus args={[1.5, 0.03, 16, 100]} rotation={[0, Math.PI / 2, 0]}>
+        <meshStandardMaterial color="#a78bfa" transparent opacity={0.4} />
       </Torus>
     </group>
   )
 }
 
-const WebDevModel = () => {
-  const groupRef = useRef()
-  
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.3
-    }
-  })
-
-  return (
-    <group ref={groupRef}>
-      {/* Monitor/Screen */}
-      <Box args={[3, 2, 0.2]} position={[0, 0.5, 0]}>
-        <meshStandardMaterial color="#1f2937" />
-      </Box>
-      
-      {/* Screen content */}
-      <Box args={[2.8, 1.8, 0.1]} position={[0, 0.5, 0.11]}>
-        <meshStandardMaterial color="#111827" />
-      </Box>
-      
-      {/* Code blocks */}
-      <Box args={[0.8, 0.2, 0.05]} position={[-0.8, 0.8, 0.15]}>
-        <meshStandardMaterial color="#3b82f6" />
-      </Box>
-      <Box args={[1.2, 0.2, 0.05]} position={[0.2, 0.5, 0.15]}>
-        <meshStandardMaterial color="#8b5cf6" />
-      </Box>
-      <Box args={[0.6, 0.2, 0.05]} position={[-0.6, 0.2, 0.15]}>
-        <meshStandardMaterial color="#f59e0b" />
-      </Box>
-      
-      {/* Stand */}
-      <Cylinder args={[0.1, 0.1, 1]} position={[0, -0.5, 0]}>
-        <meshStandardMaterial color="#6b7280" />
-      </Cylinder>
-      
-      {/* Base */}
-      <Cylinder args={[0.8, 0.8, 0.1]} position={[0, -1, 0]}>
-        <meshStandardMaterial color="#4b5563" />
-      </Cylinder>
-    </group>
-  )
-}
-
+// Data Science Model - Dynamic charts and data visualization
 const DataScienceModel = () => {
   const chartRefs = useRef([])
+  const particlesRef = useRef([])
   
   useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    // Animate chart bars
     chartRefs.current.forEach((chart, index) => {
       if (chart) {
-        const height = Math.abs(Math.sin(state.clock.elapsedTime + index)) * 2 + 0.5
+        const height = Math.abs(Math.sin(time * 2 + index * 0.5)) * 2 + 0.5
         chart.scale.y = height
+        chart.material.color.setHSL((time * 0.1 + index * 0.1) % 1, 0.7, 0.6)
+      }
+    })
+    
+    // Animate data particles
+    particlesRef.current.forEach((particle, index) => {
+      if (particle) {
+        particle.position.y = Math.sin(time + index * 0.3) * 2 + 1
+        particle.rotation.x = time + index
+        particle.rotation.z = time * 0.5 + index
       }
     })
   })
 
   return (
     <group>
-      {/* Chart bars */}
-      {Array.from({ length: 6 }).map((_, index) => (
+      {/* Animated chart bars */}
+      {Array.from({ length: 8 }).map((_, index) => (
         <Box
           key={index}
           ref={(el) => (chartRefs.current[index] = el)}
           args={[0.3, 1, 0.3]}
-          position={[index * 0.5 - 1.25, 0, 0]}
+          position={[index * 0.5 - 1.75, 0, 0]}
+        >
+          <meshStandardMaterial color={`hsl(${index * 45}, 70%, 60%)`} />
+        </Box>
+      ))}
+      
+      {/* Floating data particles */}
+      {Array.from({ length: 20 }).map((_, index) => (
+        <Octahedron
+          key={index}
+          ref={(el) => (particlesRef.current[index] = el)}
+          args={[0.08]}
+          position={[
+            (Math.random() - 0.5) * 6,
+            Math.random() * 4 + 1,
+            (Math.random() - 0.5) * 3
+          ]}
+        >
+          <meshStandardMaterial color="#10b981" transparent opacity={0.8} />
+        </Octahedron>
+      ))}
+      
+      {/* Data flow rings */}
+      <Torus args={[3, 0.1, 8, 50]} rotation={[Math.PI / 2, 0, 0]} position={[0, 2, 0]}>
+        <meshStandardMaterial color="#34d399" transparent opacity={0.3} />
+      </Torus>
+    </group>
+  )
+}
+
+// Web Development Model - Interactive website components
+const WebDevModel = () => {
+  const groupRef = useRef()
+  const elementsRef = useRef([])
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    if (groupRef.current) {
+      groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.3
+    }
+    
+    // Animate UI elements
+    elementsRef.current.forEach((element, index) => {
+      if (element) {
+        element.position.z = Math.sin(time * 2 + index) * 0.1
+        element.material.emissive.setHSL((time * 0.1 + index * 0.2) % 1, 0.3, 0.1)
+      }
+    })
+  })
+
+  return (
+    <group ref={groupRef}>
+      {/* Monitor frame */}
+      <Box args={[4, 2.5, 0.2]} position={[0, 0.5, 0]}>
+        <meshStandardMaterial color="#1f2937" />
+      </Box>
+      
+      {/* Screen */}
+      <Box args={[3.8, 2.3, 0.1]} position={[0, 0.5, 0.11]}>
+        <meshStandardMaterial color="#111827" />
+      </Box>
+      
+      {/* Animated UI components */}
+      <Box ref={(el) => (elementsRef.current[0] = el)} args={[1.2, 0.3, 0.05]} position={[-1, 1.2, 0.15]}>
+        <meshStandardMaterial color="#3b82f6" />
+      </Box>
+      <Box ref={(el) => (elementsRef.current[1] = el)} args={[1.8, 0.3, 0.05]} position={[0.3, 0.8, 0.15]}>
+        <meshStandardMaterial color="#8b5cf6" />
+      </Box>
+      <Box ref={(el) => (elementsRef.current[2] = el)} args={[1, 0.3, 0.05]} position={[-0.8, 0.4, 0.15]}>
+        <meshStandardMaterial color="#f59e0b" />
+      </Box>
+      <Box ref={(el) => (elementsRef.current[3] = el)} args={[1.5, 0.3, 0.05]} position={[0.5, 0, 0.15]}>
+        <meshStandardMaterial color="#10b981" />
+      </Box>
+      
+      {/* Floating code symbols */}
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Box
+          key={index}
+          args={[0.1, 0.1, 0.1]}
+          position={[
+            Math.sin(index) * 2,
+            Math.cos(index) * 1.5 + 0.5,
+            0.3
+          ]}
+        >
+          <meshStandardMaterial color="#60a5fa" />
+        </Box>
+      ))}
+      
+      {/* Stand */}
+      <Cylinder args={[0.1, 0.1, 1]} position={[0, -0.5, 0]}>
+        <meshStandardMaterial color="#6b7280" />
+      </Cylinder>
+    </group>
+  )
+}
+
+// Blockchain Model - Connected blocks with crypto elements
+const BlockchainModel = () => {
+  const blocksRef = useRef([])
+  const chainsRef = useRef([])
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    // Animate blocks
+    blocksRef.current.forEach((block, index) => {
+      if (block) {
+        block.rotation.y = time * 0.5 + index * 0.3
+        block.position.y = Math.sin(time + index * 0.5) * 0.2
+      }
+    })
+    
+    // Animate connection chains
+    chainsRef.current.forEach((chain, index) => {
+      if (chain) {
+        chain.material.opacity = 0.5 + Math.sin(time * 3 + index) * 0.3
+      }
+    })
+  })
+
+  return (
+    <group>
+      {/* Blockchain blocks */}
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Box
+          key={index}
+          ref={(el) => (blocksRef.current[index] = el)}
+          args={[0.8, 0.8, 0.8]}
+          position={[index * 1.2 - 2.4, 0, 0]}
+        >
+          <meshStandardMaterial 
+            color={`hsl(${200 + index * 20}, 70%, 60%)`}
+            transparent
+            opacity={0.8}
+          />
+        </Box>
+      ))}
+      
+      {/* Connection chains */}
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Cylinder
+          key={index}
+          ref={(el) => (chainsRef.current[index] = el)}
+          args={[0.05, 0.05, 0.4]}
+          position={[index * 1.2 - 1.8, 0, 0]}
+          rotation={[0, 0, Math.PI / 2]}
+        >
+          <meshStandardMaterial color="#60a5fa" transparent />
+        </Cylinder>
+      ))}
+      
+      {/* Crypto symbols floating around */}
+      {Array.from({ length: 8 }).map((_, index) => (
+        <Octahedron
+          key={index}
+          args={[0.1]}
+          position={[
+            Math.cos(index * 0.785) * 3,
+            Math.sin(index * 0.785) * 2,
+            Math.sin(index * 0.5) * 1.5
+          ]}
+        >
+          <meshStandardMaterial color="#f59e0b" />
+        </Octahedron>
+      ))}
+    </group>
+  )
+}
+
+// Mobile App Model - Phone with animated interface
+const MobileAppModel = () => {
+  const phoneRef = useRef()
+  const elementsRef = useRef([])
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    if (phoneRef.current) {
+      phoneRef.current.rotation.y = Math.sin(time * 0.5) * 0.2
+      phoneRef.current.position.y = Math.sin(time) * 0.1
+    }
+    
+    // Animate UI elements
+    elementsRef.current.forEach((element, index) => {
+      if (element) {
+        element.scale.x = 1 + Math.sin(time * 2 + index) * 0.1
+        element.material.color.setHSL((time * 0.1 + index * 0.3) % 1, 0.7, 0.6)
+      }
+    })
+  })
+
+  return (
+    <group ref={phoneRef}>
+      {/* Phone body */}
+      <Box args={[1.2, 2.4, 0.2]} position={[0, 0, 0]}>
+        <meshStandardMaterial color="#1f2937" />
+      </Box>
+      
+      {/* Screen */}
+      <Box args={[1, 2, 0.05]} position={[0, 0, 0.11]}>
+        <meshStandardMaterial color="#111827" />
+      </Box>
+      
+      {/* Animated app icons */}
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Box
+          key={index}
+          ref={(el) => (elementsRef.current[index] = el)}
+          args={[0.2, 0.2, 0.02]}
+          position={[
+            (index % 3) * 0.3 - 0.3,
+            Math.floor(index / 3) * 0.3 + 0.3,
+            0.13
+          ]}
         >
           <meshStandardMaterial color={`hsl(${index * 60}, 70%, 60%)`} />
         </Box>
       ))}
       
-      {/* Base platform */}
-      <Box args={[4, 0.1, 2]} position={[0, -0.5, 0]}>
-        <meshStandardMaterial color="#374151" />
-      </Box>
-      
-      {/* Floating data points */}
-      {Array.from({ length: 10 }).map((_, index) => (
+      {/* Notification bubbles */}
+      {Array.from({ length: 4 }).map((_, index) => (
         <Sphere
           key={index}
-          args={[0.05, 8, 8]}
+          args={[0.05]}
           position={[
-            (Math.random() - 0.5) * 4,
-            Math.random() * 3 + 1,
-            (Math.random() - 0.5) * 2
+            Math.sin(index * 1.5) * 1.5,
+            Math.cos(index * 1.5) * 1.5,
+            0.5
           ]}
         >
-          <meshStandardMaterial color="#10b981" />
+          <meshStandardMaterial color="#ef4444" />
         </Sphere>
       ))}
+    </group>
+  )
+}
+
+// Cybersecurity Model - Shield with security elements
+const CybersecurityModel = () => {
+  const shieldRef = useRef()
+  const particlesRef = useRef([])
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    if (shieldRef.current) {
+      shieldRef.current.rotation.y = time * 0.3
+      shieldRef.current.scale.setScalar(1 + Math.sin(time * 2) * 0.1)
+    }
+    
+    // Animate security particles
+    particlesRef.current.forEach((particle, index) => {
+      if (particle) {
+        const radius = 2 + Math.sin(time + index) * 0.5
+        particle.position.x = Math.cos(time + index * 0.5) * radius
+        particle.position.z = Math.sin(time + index * 0.5) * radius
+        particle.position.y = Math.sin(time * 2 + index) * 0.5
+      }
+    })
+  })
+
+  return (
+    <group>
+      {/* Central shield */}
+      <Octahedron ref={shieldRef} args={[1.2]} position={[0, 0, 0]}>
+        <meshStandardMaterial color="#10b981" wireframe transparent opacity={0.8} />
+      </Octahedron>
+      
+      {/* Security barrier rings */}
+      <Torus args={[2, 0.1, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial color="#34d399" transparent opacity={0.4} />
+      </Torus>
+      <Torus args={[2.5, 0.05, 16, 100]} rotation={[0, Math.PI / 2, 0]}>
+        <meshStandardMaterial color="#6ee7b7" transparent opacity={0.3} />
+      </Torus>
+      
+      {/* Floating security nodes */}
+      {Array.from({ length: 8 }).map((_, index) => (
+        <Icosahedron
+          key={index}
+          ref={(el) => (particlesRef.current[index] = el)}
+          args={[0.1]}
+          position={[0, 0, 0]}
+        >
+          <meshStandardMaterial color="#059669" />
+        </Icosahedron>
+      ))}
+    </group>
+  )
+}
+
+// API Development Model - Data flow visualization
+const APIModel = () => {
+  const serverRef = useRef()
+  const dataFlowRef = useRef([])
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    if (serverRef.current) {
+      serverRef.current.rotation.y = time * 0.2
+    }
+    
+    // Animate data packets
+    dataFlowRef.current.forEach((packet, index) => {
+      if (packet) {
+        const progress = (time + index * 0.5) % 4
+        packet.position.x = Math.sin(progress) * 2
+        packet.position.y = Math.cos(progress) * 1.5
+        packet.scale.setScalar(0.5 + Math.sin(time * 3 + index) * 0.3)
+      }
+    })
+  })
+
+  return (
+    <group>
+      {/* Central server */}
+      <Box ref={serverRef} args={[1, 1.5, 0.5]} position={[0, 0, 0]}>
+        <meshStandardMaterial color="#f59e0b" />
+      </Box>
+      
+      {/* API endpoints */}
+      {Array.from({ length: 6 }).map((_, index) => {
+        const angle = (index / 6) * Math.PI * 2
+        return (
+          <Box
+            key={index}
+            args={[0.3, 0.3, 0.3]}
+            position={[
+              Math.cos(angle) * 2.5,
+              Math.sin(angle) * 1.5,
+              0
+            ]}
+          >
+            <meshStandardMaterial color="#fb923c" />
+          </Box>
+        )
+      })}
+      
+      {/* Data flow particles */}
+      {Array.from({ length: 12 }).map((_, index) => (
+        <Sphere
+          key={index}
+          ref={(el) => (dataFlowRef.current[index] = el)}
+          args={[0.05]}
+          position={[0, 0, 0]}
+        >
+          <meshStandardMaterial color="#fbbf24" />
+        </Sphere>
+      ))}
+    </group>
+  )
+}
+
+// System Design Model - Architecture visualization
+const SystemDesignModel = () => {
+  const componentsRef = useRef([])
+  const connectionsRef = useRef([])
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    // Animate system components
+    componentsRef.current.forEach((component, index) => {
+      if (component) {
+        component.position.y = Math.sin(time + index * 0.7) * 0.3
+        component.rotation.y = time * 0.3 + index
+      }
+    })
+    
+    // Animate data connections
+    connectionsRef.current.forEach((connection, index) => {
+      if (connection) {
+        connection.material.opacity = 0.3 + Math.sin(time * 2 + index) * 0.3
+      }
+    })
+  })
+
+  return (
+    <group>
+      {/* System components */}
+      {[
+        { pos: [0, 1, 0], color: '#14b8a6' },
+        { pos: [-2, 0, 0], color: '#0891b2' },
+        { pos: [2, 0, 0], color: '#0284c7' },
+        { pos: [0, -1, 0], color: '#0369a1' }
+      ].map((comp, index) => (
+        <Box
+          key={index}
+          ref={(el) => (componentsRef.current[index] = el)}
+          args={[0.8, 0.8, 0.8]}
+          position={comp.pos}
+        >
+          <meshStandardMaterial color={comp.color} />
+        </Box>
+      ))}
+      
+      {/* Connection lines */}
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Cylinder
+          key={index}
+          ref={(el) => (connectionsRef.current[index] = el)}
+          args={[0.02, 0.02, 1.5]}
+          position={[0, 0, 0]}
+          rotation={[0, 0, index * Math.PI / 3]}
+        >
+          <meshStandardMaterial color="#06b6d4" transparent />
+        </Cylinder>
+      ))}
+    </group>
+  )
+}
+
+// Default model for other skills
+const DefaultModel = ({ color = '#3b82f6' }) => {
+  const groupRef = useRef()
+  
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    if (groupRef.current) {
+      groupRef.current.rotation.x = time * 0.3
+      groupRef.current.rotation.y = time * 0.5
+      groupRef.current.scale.setScalar(1 + Math.sin(time * 2) * 0.1)
+    }
+  })
+
+  return (
+    <group ref={groupRef}>
+      <Icosahedron args={[1]} position={[0, 0, 0]}>
+        <meshStandardMaterial color={color} wireframe />
+      </Icosahedron>
+      <Torus args={[1.5, 0.1, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial color={color} transparent opacity={0.6} />
+      </Torus>
     </group>
   )
 }
@@ -151,26 +561,42 @@ const Model3DComponent = ({ skillType }) => {
       case 'Generative AI':
       case 'Agentic AI':
         return <AIMLModel />
+      case 'Data Science':
+        return <DataScienceModel />
       case 'Web Development':
       case 'UI/UX Design':
-      case 'API Development':
         return <WebDevModel />
-      case 'Data Science':
+      case 'Blockchain':
+        return <BlockchainModel />
+      case 'App Development':
+        return <MobileAppModel />
+      case 'Cybersecurity':
+        return <CybersecurityModel />
+      case 'API Development':
+        return <APIModel />
       case 'System Design':
-        return <DataScienceModel />
+        return <SystemDesignModel />
       default:
-        return <AIMLModel />
+        return <DefaultModel />
     }
   }
 
   return (
     <Canvas camera={{ position: [0, 0, 8], fov: 50 }}>
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.4} />
       <pointLight position={[10, 10, 10]} intensity={1} />
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
+      <pointLight position={[0, 10, -10]} intensity={0.3} color="#f59e0b" />
       <Suspense fallback={null}>
         {getModel()}
-        <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+        <OrbitControls 
+          enableZoom={false} 
+          autoRotate 
+          autoRotateSpeed={0.5}
+          enablePan={false}
+          maxPolarAngle={Math.PI / 1.5}
+          minPolarAngle={Math.PI / 3}
+        />
       </Suspense>
     </Canvas>
   )
@@ -179,6 +605,16 @@ const Model3DComponent = ({ skillType }) => {
 const SkillDetailPage = () => {
   const { skillId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [scrollPosition, setScrollPosition] = useState(0)
+  
+  // Store scroll position when component mounts
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem('portfolioScrollPosition')
+    if (savedScrollPosition) {
+      setScrollPosition(parseInt(savedScrollPosition))
+    }
+  }, [])
   
   // Find skill by title (converted to URL-friendly format)
   const skill = skillsData.find(s => 
@@ -191,21 +627,30 @@ const SkillDetailPage = () => {
     }
   }, [skill, navigate])
 
-  // Handle back navigation
+  // Handle back navigation with scroll restoration
   const handleBackNavigation = () => {
     navigate('/')
-    // Small delay to ensure navigation completes, then scroll to skills
+    // Restore scroll position after navigation
     setTimeout(() => {
-      const skillsSection = document.getElementById('skills')
-      if (skillsSection) {
-        const headerHeight = 80
-        const elementPosition = skillsSection.offsetTop - headerHeight
-        
+      if (scrollPosition > 0) {
         window.scrollTo({
-          top: elementPosition,
+          top: scrollPosition,
           behavior: 'smooth'
         })
+      } else {
+        const skillsSection = document.getElementById('skills')
+        if (skillsSection) {
+          const headerHeight = 80
+          const elementPosition = skillsSection.offsetTop - headerHeight
+          
+          window.scrollTo({
+            top: elementPosition,
+            behavior: 'smooth'
+          })
+        }
       }
+      // Clear stored position
+      sessionStorage.removeItem('portfolioScrollPosition')
     }, 100)
   }
 
@@ -224,7 +669,7 @@ const SkillDetailPage = () => {
       scale: 1,
       y: 0,
       transition: {
-        duration: 0.8,
+        duration: 0.6,
         ease: [0.16, 1, 0.3, 1],
         staggerChildren: 0.1
       }
@@ -233,7 +678,7 @@ const SkillDetailPage = () => {
       opacity: 0,
       scale: 1.05,
       transition: {
-        duration: 0.5,
+        duration: 0.4,
         ease: [0.16, 1, 0.3, 1]
       }
     }
@@ -245,7 +690,7 @@ const SkillDetailPage = () => {
       opacity: 1, 
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.5,
         ease: [0.16, 1, 0.3, 1]
       }
     }

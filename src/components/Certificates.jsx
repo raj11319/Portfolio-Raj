@@ -45,17 +45,22 @@ const Certificates = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
+        staggerChildren: 0.15,
+        delayChildren: 0.1
       }
     }
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5 }
+      scale: 1,
+      transition: { 
+        duration: 0.5,
+        ease: [0.16, 1, 0.3, 1]
+      }
     }
   }
 
@@ -79,47 +84,58 @@ const Certificates = () => {
 
           <motion.p 
             variants={itemVariants}
-            className="text-center text-gray-700 dark:text-gray-300 mb-12"
+            className="text-center text-gray-300 mb-12 max-w-2xl mx-auto"
           >
             Professional certifications and achievements that validate my expertise
           </motion.p>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             {certificates.map((cert, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
                 className="card overflow-hidden hover-lift"
+                whileHover={{ 
+                  y: -5,
+                  transition: { duration: 0.3 }
+                }}
               >
-                <div className="relative h-48">
-                  <img 
+                <div className="relative h-40 overflow-hidden">
+                  <motion.img 
                     src={cert.image} 
                     alt={cert.title}
                     className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 </div>
                 
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+                  <h3 className="text-lg font-bold text-white mb-2">
                     {cert.title}
                   </h3>
                   
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">
+                  <div className="flex justify-between items-center text-sm mb-4">
+                    <span className="text-gray-400">
                       {cert.issuer}
                     </span>
-                    <span className="text-primary-600 dark:text-primary-400">
+                    <span className="text-primary-400">
                       {cert.date}
                     </span>
                   </div>
                   
-                  <a 
+                  <motion.a 
                     href={cert.link}
-                    className="mt-4 inline-block text-primary-600 dark:text-primary-400 hover:underline"
+                    className="inline-flex items-center text-primary-400 hover:text-primary-300 transition-colors text-sm font-medium"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
-                    View Certificate →
-                  </a>
+                    View Certificate 
+                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.a>
                 </div>
               </motion.div>
             ))}

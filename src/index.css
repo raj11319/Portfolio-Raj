@@ -109,6 +109,7 @@ p, span, div {
     transition: all 0.3s var(--ease-out-quart);
     transform: translateY(0);
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+    will-change: transform, box-shadow;
   }
   
   .btn-primary:hover {
@@ -124,7 +125,7 @@ p, span, div {
   .card {
     @apply bg-gray-800/90 backdrop-blur-lg rounded-xl shadow-xl border border-gray-700/50;
     padding: var(--card-padding);
-    transition: all 0.4s var(--ease-out-expo);
+    transition: all 0.3s var(--ease-out-expo);
     transform: translateY(0) scale(1);
     will-change: transform, box-shadow;
     box-shadow: 
@@ -134,9 +135,9 @@ p, span, div {
   
   .card:hover {
     @apply border-gray-600/70;
-    transform: translateY(-6px) scale(1.01);
+    transform: translateY(-4px) scale(1.01);
     box-shadow: 
-      0 15px 35px rgba(0, 0, 0, 0.4),
+      0 12px 30px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(59, 130, 246, 0.1);
   }
   
@@ -170,7 +171,7 @@ p, span, div {
 /* Enhanced responsive grid */
 .skill-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: clamp(1rem, 3vw, 2rem);
   perspective: 1000px;
 }
@@ -190,19 +191,19 @@ p, span, div {
 
 @media (min-width: 1025px) {
   .skill-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 
 /* Professional animation utilities */
 .hover-lift {
-  transition: all 0.4s var(--ease-out-expo);
+  transition: all 0.3s var(--ease-out-expo);
   will-change: transform, box-shadow;
 }
 
 .hover-lift:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 }
 
 .text-gradient {
@@ -371,7 +372,7 @@ a, button, input, textarea, select {
 /* Responsive touch interactions */
 @media (hover: none) and (pointer: coarse) {
   .hover-lift:active {
-    transform: translateY(-3px) scale(1.01);
+    transform: translateY(-2px) scale(1.01);
     transition: all 0.2s var(--ease-out-quart);
   }
   
@@ -429,6 +430,8 @@ a:hover {
   transition: all 0.3s ease;
   padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem);
   font-size: clamp(0.875rem, 2vw, 1rem);
+  border-radius: 0.5rem;
+  font-weight: 500;
 }
 
 .btn-professional::before {
@@ -652,4 +655,18 @@ video {
       font-size: 1rem;
     }
   }
+}
+
+/* Performance optimizations for animations */
+@media (prefers-reduced-motion: no-preference) {
+  .card, .hover-lift, .btn-primary {
+    will-change: transform, box-shadow;
+  }
+}
+
+/* Optimized transforms for better performance */
+.transform-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
